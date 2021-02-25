@@ -1,6 +1,6 @@
 # svame/alpine-mongo
 
-这是个部署了 MongoDB 的 Alpine 版 Docker 镜像。此镜像将在运行时，通过环境变量设置 root / admin 帐号的用户名和密码，并默认启用 "--auth" 授权模式。
+这是个部署了 MongoDB 的 Alpine 版 Docker 镜像。此镜像将在运行时，通过环境变量设置用户名和密码，并默认启用 "--auth" 授权模式。
 
 ## 一、环境变量
 
@@ -12,23 +12,13 @@
 
 - **MONGO_ROOT_PASSWORD**
 
-  默认为 "root"，mongod 实例的  root 帐号密码。
-
-- **MONGO_ADMIN_USERNAME**
-
-  默认为 "admin"，带有 userAdminAnyDatabase 权限的帐号名称。
-
-- **MONGO_ADMIN_PASSWORD**
-
-  默认为 "admin"， 帐号 admin 的密码。
+  默认为 "root"，mongod 实例的 root 帐号密码。
 
 ### 配置文件 env-file：
 
 ```shell
-MONGO_ROOT_USERNAME="root"
-MONGO_ROOT_PASSWORD="root"
-MONGO_ADMIN_USERNAME="admin"
-MONGO_ADMIN_PASSWORD="admin"
+MONGO_ROOT_USERNAME=root
+MONGO_ROOT_PASSWORD=root
 ```
 
 ## 二、使用说明
@@ -54,7 +44,7 @@ docker run -d \
   -p 27017:27017 \
   -v $WORK_DIR/data:/data/db \
   -v $WORK_DIR/etc:/etc/mongo \
-  -v $WORK_DIR/logs:/var/log/mongodb \
+  -v $WORK_DIR/logs:/var/log/mongo \
   svame/alpine-mongo
 ```
 
@@ -71,20 +61,15 @@ docker run -d \
   -p 27017:27017 \
   -v $WORK_DIR/data:/data/db \
   -v $WORK_DIR/etc:/etc/mongo \
-  -v $WORK_DIR/logs:/var/log/mongodb \
-  -e MONGO_ROOT_USERNAME=root \
-  -e MONGO_ROOT_PASSWORD=root \
-  -e MONGO_ADMIN_USERNAME=admin \
-  -e MONGO_ADMIN_PASSWORD=admin \
+  -v $WORK_DIR/logs:/var/log/mongo \
+  -e MONGO_USERNAME=root \
+  -e MONGO_PASSWORD=root \
   svame/alpine-mongo
 ```
 
 或者使用配置文件 env-file 来设置帐号密码：
 
 ```shell
-# 脚本所在目录
-SRC_DIR=$(cd `dirname $0`; pwd)
-
 # 创建工作目录
 WORK_DIR=~/docker/mongo
 mkdir -p $WORK_DIR
@@ -92,11 +77,11 @@ mkdir -p $WORK_DIR
 docker run -d \
   --restart=unless-stopped \
   --name mongo \
-  --env-file $SRC_DIR/env-file \
+  --env-file env-file \
   -p 27017:27017 \
   -v $WORK_DIR/data:/data/db \
   -v $WORK_DIR/etc:/etc/mongo \
-  -v $WORK_DIR/logs:/var/log/mongodb \
+  -v $WORK_DIR/logs:/var/log/mongo \
   svame/alpine-mongo
 ```
 
@@ -143,7 +128,7 @@ docker ps -a
 
 容器启动时会做以下这些动作：
 
-- 创建两个 mongo 帐号 root 和 admin
+- 创建 mongo 帐号 root
 - 加载配置文件：`~/docker/mongo/etc/mongod.conf`
 - 创建数据目录：`~/docker/mongo/data`
 - 创建日志目录：`~/docker/mongo/logs`
@@ -153,5 +138,6 @@ docker ps -a
 ```shell
 docker exec -it mongo mongo
 > use admin
+> db.auth('root', 'root')
 > show users
 ```

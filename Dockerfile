@@ -1,10 +1,8 @@
 FROM alpine:3.9
 
-# 默认的 root 和 admin 帐号密码，可在 run 容器时加 --env-file 指定
-ENV MONGO_ROOT_USERNAME root
-ENV MONGO_ROOT_PASSWORD root
-ENV MONGO_ADMIN_USERNAME admin
-ENV MONGO_ADMIN_PASSWORD admin
+# 默认的 root 帐号密码，可在 run 容器时加 --env-file 指定
+ENV MONGO_USERNAME root
+ENV MONGO_PASSWORD root
 
 # 使用国内镜像源
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
@@ -19,10 +17,11 @@ RUN set -eux \
   && apk del tzdata \
   && apk add --no-cache mongodb
 
-COPY entrypoint.sh /entrypoint.sh
-COPY mongod.conf /etc/mongo/mongod.conf
-
 VOLUME /data/db
+VOLUME /etc/mongo
+
+COPY mongod.conf /mongod.conf
+COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 27017 28017
 

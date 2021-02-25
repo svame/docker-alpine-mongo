@@ -5,13 +5,11 @@ set -eux
 # Docker entrypoint (pid 1), run as root
 [ "$1" = "mongod" ] || exec "$@" || exit $?
 
-# Make sure that database is owned by user mongodb
+# 确保数据库归属于 mongodb 用户
 [ "$(stat -c %U /data/db)" = mongodb ] || chown -R mongodb /data/db
 
-: ${MONGO_ROOT_USERNAME}
-: ${MONGO_ROOT_PASSWORD}
-: ${MONGO_ADMIN_USERNAME}
-: ${MONGO_ADMIN_PASSWORD}
+: ${MONGO_USERNAME}
+: ${MONGO_PASSWORD}
 
 if ! [ -f /data/db/mongo_initialized ]; then
     echo "Used by svame/alpine-mongo docker container." > /data/db/mongo_initialized
@@ -26,25 +24,22 @@ if ! [ -f /data/db/mongo_initialized ]; then
         RET=$?
     done
 
-    # set root user
+    # 创建 root 帐号
     mongo admin --eval \
         "db.createUser({
-            user: '$MONGO_ROOT_USERNAME',
-            pwd: '$MONGO_ROOT_PASSWORD',
+            user: '$MONGO_USERNAME',
+            pwd: '$MONGO_PASSWORD',
             roles: [{role: 'root', db: 'admin'}]
-        });
-        db.createUser({
-            user: '$MONGO_ADMIN_USERNAME',
-            pwd: '$MONGO_ADMIN_PASSWORD',
-            roles: [{role: 'userAdminAnyDatabase', db: 'admin'}]
         });"
-
     mongod --shutdown
+fi
+
+# 拷贝配置文件
+if ! [ -f /etc/mongo/mongod.conf ]; then
+    cp /mongod.conf /etc/mongo/
 fi
 
 cmd="$@"
 
 # Drop root privilege (no way back), exec provided command as user mongodb
-#cmd=exec; for i; do cmd="$cmd '$i'"; done
-
 exec su -s /bin/sh -c "$cmd -f /etc/mongo/mongod.conf" mongodb
