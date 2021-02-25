@@ -16,6 +16,7 @@ echo "账号密码："
 echo $(cat $SRC_DIR/env-file)
 
 docker run -d \
+  --restart=unless-stopped \
   --name mongo \
   --env-file $SRC_DIR/env-file \
   -p 27017:27017 \
