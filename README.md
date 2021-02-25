@@ -6,19 +6,19 @@
 
 ### 变量说明：
 
-- **MONGO_ROOT_USERNAME**
+- **MONGO_USERNAME**
 
   默认为 "root"，mongod 实例的 root 帐号名称。
 
-- **MONGO_ROOT_PASSWORD**
+- **MONGO_PASSWORD**
 
   默认为 "root"，mongod 实例的 root 帐号密码。
 
 ### 配置文件 env-file：
 
 ```shell
-MONGO_ROOT_USERNAME=root
-MONGO_ROOT_PASSWORD=root
+MONGO_USERNAME=root
+MONGO_PASSWORD=root
 ```
 
 ## 二、使用说明
